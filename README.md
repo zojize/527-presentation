@@ -1,5 +1,7 @@
 # Welcome to [Slidev](https://github.com/slidevjs/slidev)!
 
+Deployed at <https://zojize.github.io/527-presentation>
+
 To start the slide show:
 
 - `pnpm install`
