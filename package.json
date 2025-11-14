@@ -1,0 +1,19 @@
+{
+  "name": "527-presentation",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "build": "slidev build",
+    "dev": "slidev --open",
+    "export": "slidev export"
+  },
+  "dependencies": {
+    "@iconify-json/ph": "^1.2.2",
+    "@slidev/cli": "^52.8.0",
+    "@slidev/theme-default": "latest",
+    "@slidev/theme-seriph": "latest",
+    "shiki": "^3.15.0",
+    "shiki-magic-move": "^1.2.1",
+    "vue": "^3.5.24"
+  }
+}
