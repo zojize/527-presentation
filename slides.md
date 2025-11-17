@@ -242,9 +242,9 @@ describe('Array operations', () => {
 
 ---
 
-# `TSV-TOD`
+# [`TSV-TOD`](https://github.com/zojize/TSV-TOD)
 
-<p class="text-sm text-gray"> TypeScript Vitest Test Order-dependency Detector (Name inspired by <a href="https://github.com/Negar-Hashemi/JS-TOD">`JS-TOD`</a>) </p>
+<p class="text-sm text-gray"> TypeScript Vitest Test Order-dependency Detector (Name inspired by <a href="https://github.com/Negar-Hashemi/JS-TOD">https://github.com/Negar-Hashemi/JS-TOD</a>) </p>
 
 - Custom Vitest sequencer that permutes test order with seeded runs
 - Supports iDFlakies-inspired configurations: `original`, `random-group`/`test`, `reverse-group`/`test`
