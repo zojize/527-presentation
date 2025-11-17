@@ -16,14 +16,33 @@ Jeff Zou
 
 # What Makes E2E Tests Different?
 
-<v-clicks class="text-2xl">
+<v-clicks depth="2" class="text-xl" every="2">
 
-- Require external resources
-- Highly asynchronous in nature
-- Harder to detect and reproduce
-- Slow in CI environments
+- **Highly asynchronous in nature**
+  - Tests race against both external network requests (**`Network`** flakiness) and internal UI updates like rendering and animations (**`Async Wait`** flakiness), the #1 root cause (Romano et al., 2021).
+
+- **Harder to detect and reproduce**
+  - Failures often only appear in the slow, resource-constrained CI pipeline. These **`Environment`**-specific flakes are hard to reproduce locally because of differences in OS, browser version, or screen resolution (Romano et al., 2021).
 
 </v-clicks>
+
+<style>
+li p {
+  margin: 0 auto;
+}
+</style>
+
+<!--
+We've mostly talked about flaky tests in the unit test world so far in this class, but E2E tests are a fundamentally different. I want to break down the four key characteristics that make them prone to flakiness
+
+[click] First, E2E tests live in a world of unpredictable timing. This isn't just one problem, but two related ones. On one hand, you have external dependencies. The Romano paper calls this Network flakiness, where your test fails because a real backend service is slow or temporarily unavailable.
+
+On the other hand, you have internal asynchronicity. This is the single biggest cause of flaky tests, a category the paper calls Async Wait. It happens when your test script is executing faster than the browser can finish rendering DOM elements, loading data, or playing an animation. Both of these issues boil down to the same thing: a fundamental mismatch in timing between our test and the application.
+
+[click] Second, the test environment itself becomes a primary source of flakiness. This is why we so often hear, 'It works on my machine!' The paper classifies these as Environment-specific issues. A test might fail only on the Linux CI runner, or in a specific browser version, or at a different screen resolution.
+
+This problem is massively amplified by the nature of CI environments. They are often slower and more resource-constrained than our local development machines. This slowness isn't just an inconvenience; it's a catalyst. It takes those timing-related race conditions we just discussed and makes them far more likely to surface as real, intermittent failures. The slow, inconsistent nature of the CI environment is what makes these flakes so difficult to reproduce and debug.
+-->
 
 ---
 
@@ -48,10 +67,40 @@ Jeff Zou
 
 </v-clicks>
 
+<!--
+
+Async Wait is the number one problem, making up nearly half of all E2E flakes. Let's break down what that actually means. At its core, it's a simple race condition: our test script is giving the browser commands faster than the browser can keep up.
+
+This single category can be broken down into three more specific types of race conditions.
+
+[click]
+
+First, we have Network Resource Loading Imagine your test clicks a button that triggers a `fetch` request to an API to load a list of items. Your test script, running at full speed, immediately moves to the next line and asserts that the list contains ten items.
+
+But of course, the network request is still pending. It hasn't even hit the server yet, let alone returned a response. The assertion fails because it's checking for a state that is dependent on a slow, external operation. This is a race between your test script and the network.
+
+[click]
+
+Second, we have Resource Rendering. This one is more subtle. In this case, the data might have already returned from the network and be present in the browser's memory, but it's not yet visible or interactable on the screen.
+
+Think about a modal dialog that fades in with a CSS transition. The DOM element for the modal might exist the instant you click the button, but it's not yet visible or stable. If your test immediately tries to click a button *inside* that modal, it will fail with an 'element not interactable' error. This is a race between your test script and the browser's rendering engine."
+
+[click]
+
+Finally, a particularly tricky subset of rendering issues is Animation Timing. This happens when an element is technically visible but is still moving. A classic example is a notification toast that slides in from the side of the screen.
+
+Your test might correctly wait for it to be visible, but then immediately try to click its 'close' button. If the animation is still in progress, the click might miss or hit the wrong coordinates. This problem is even worse in CI environments, where headless browsers often throttle or change how they handle animations, making the timing completely different from what you see on your local machine.
+
+So, as you can see, this one 'Async Wait' category covers a whole range of timing problems—racing the network, racing the renderer, and racing animations. Now, let's look at what this looks like in a real piece of code and, more importantly, how we fix it.
+
+-->
+
 
 ---
+layout: cover
+---
 
-# TODO: more slides on E2E flaky tests and demo
+# DEMO
 
 
 ---
@@ -276,4 +325,67 @@ describe('spam', () => {
 
 ---
 
-# TODO: slides on results, analysis and next Steps
+# DEMO
+
+---
+layout: cover
+---
+
+# Some Results
+
+---
+class: p-4 leading-[0.5rem]
+---
+
+| Project                                  | OD Test Files | Failing Test Files | Total Test Files |
+| ---------------------------------------- | ------------- | ------------------ | ---------------- |
+| vueuse/vueuse                            | 6             | 25                 | 209              |
+| rolldown/tsdown                          | 5             | 6                  | 11               |
+| antfu/unocss                             | 4             | 13                 | 87               |
+| paritytech/asset-transfer-api            | 1             | 7                  | 92               |
+| antfu/eslint-config                      | 0             | 2                  | 3                |
+| antfu/eslint-plugin-command              | 0             | 0                  | 21               |
+| aooiuu/any-reader                        | 0             | 1                  | 2                |
+| davelosert/vitest-coverage-report-action | 0             | 0                  | 14               |
+| elk-zone/elk                             | 0             | 0                  | 6                |
+| eslint-stylistic/eslint-stylistic        | 0             | 2                  | 122              |
+| getsentry/vitest-evals                   | 0             | 0                  | 6                |
+| mayneyao/eidos                           | 0             | 7                  | 29               |
+| slidevjs/slidev                          | 0             | 0                  | 5                |
+| sxzz/unplugin-utils                      | 0             | 0                  | 2                |
+| tinylibs/tinyspy                         | 0             | 0                  | 3                |
+
+---
+
+# Causes of OD Flaky Tests
+
+-   **Shared Mutable State:** Tests that modify shared state without proper isolation can lead to order-dependent failures.
+-   **Improper Cleanup:** Tests that do not clean up after themselves can leave the environment in an unexpected state for subsequent tests.
+-   **Improper Serialization/Deserialization:** Tests that rely on serialization and deserialization snapshots may fail if the order of operations affects the serialized state.
+
+---
+
+# Discussion
+
+-  Low prevalence of order-dependent tests in JavaScript compared to other languages like Python and Java.
+-  Attributed to:
+   1. JavaScript developers' test organization practices (grouping related tests together).
+   2. Testing frameworks (Vitest, Jest) running tests files in parallel by default and run test cases in the order they appear within files.
+   3. Different programming practices (e.g., functional programming style) reducing shared mutable state.
+-  No major language-specific factors causing test order dependency in JavaScript.
+
+---
+
+# Next Steps
+
+- Collect more Vitest projects to analyze.
+- Implement classification step to identify NOD/OD tests and vitim/polluter pairs
+- Identify specific Victim, Polluter and Cleaners
+- Publish as NPM package
+- OR PR to Vitest repo
+
+---
+layout: cover
+---
+
+# Thank You!
