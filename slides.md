@@ -358,22 +358,20 @@ class: p-4 leading-[0.5rem]
 
 | Project                                  | OD Test Files | Failing Test Files | Total Test Files |
 | ---------------------------------------- | ------------- | ------------------ | ---------------- |
-| vueuse/vueuse                            | 6             | 25                 | 209              |
-| rolldown/tsdown                          | 5             | 6                  | 11               |
-| antfu/unocss                             | 4             | 13                 | 87               |
+| rolldown/tsdown                          | 5             | 4                  | 12               |
+| antfu/unocss                             | 4             | 4                  | 87               |
+| vueuse/vueuse                            | 4             | 27                 | 210              |
 | paritytech/asset-transfer-api            | 1             | 7                  | 92               |
 | antfu/eslint-config                      | 0             | 2                  | 3                |
 | antfu/eslint-plugin-command              | 0             | 0                  | 21               |
 | aooiuu/any-reader                        | 0             | 1                  | 2                |
 | davelosert/vitest-coverage-report-action | 0             | 0                  | 14               |
 | elk-zone/elk                             | 0             | 0                  | 6                |
-| eslint-stylistic/eslint-stylistic        | 0             | 2                  | 122              |
-| getsentry/vitest-evals                   | 0             | 0                  | 6                |
+| eslint-stylistic/eslint-stylistic        | 0             | 1                  | 122              |
 | mayneyao/eidos                           | 0             | 7                  | 29               |
 | slidevjs/slidev                          | 0             | 0                  | 5                |
 | sxzz/unplugin-utils                      | 0             | 0                  | 2                |
 | tinylibs/tinyspy                         | 0             | 0                  | 3                |
-
 ---
 
 # Causes of OD Flaky Tests
@@ -408,3 +406,13 @@ layout: cover
 ---
 
 # Thank You!
+
+---
+
+# References
+
+- A. Romano, Z. Song, S. Grandhi, W. Yang and W. Wang, "An Empirical Analysis of UI-Based Flaky Tests," 2021 IEEE/ACM 43rd International Conference on Software Engineering (ICSE), Madrid, ES, 2021, pp. 1585-1597, doi: 10.1109/ICSE43902.2021.00141.
+- Liu, X., Song, Z., Fang, W., Yang, W., & Wang, W. (2024). WEFix: Intelligent Automatic Generation of Explicit Waits for Efficient Web End-to-End Flaky Tests. ArXiv. https://doi.org/10.1145/3589334.3645628
+- Hashemi, N., Tahir, A., Rasheed, S., Shi, A., & Blagojevic, R. (2025). Detecting and Evaluating Order-Dependent Flaky Tests in JavaScript. ArXiv. https://arxiv.org/abs/2501.12680
+
+---
