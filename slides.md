@@ -39,15 +39,42 @@ li p {
 [^1]:(Romano et al., 2021) https://doi.org/10.1109/ICSE43902.2021.00141
 
 <!--
-We've mostly talked about flaky tests in the unit test world so far in this class, but E2E tests are a fundamentally different. I want to break down the four key characteristics that make them prone to flakiness
+- We've mostly talked about flaky tests in the unit test so far in this class
+-  E2E tests are fundamentally different
+-  I want to break down the key characteristics that make E2E test prone to flakiness
 
-[click] First, E2E tests live in a world of unpredictable timing. This isn't just one problem, but two related ones. On one hand, you have external dependencies. The Romano paper calls this Network flakiness, where your test fails because a real backend service is slow or temporarily unavailable.
+[click]
 
-On the other hand, you have internal asynchronicity. This is the single biggest cause of flaky tests, a category the paper calls Async Wait. It happens when your test script is executing faster than the browser can finish rendering DOM elements, loading data, or playing an animation. Both of these issues boil down to the same thing: a fundamental mismatch in timing between our test and the application.
+- unpredictable timing
+- external dependencies
+- Romano paper calls this Network flakiness
+  - production backend service is slow or temporarily unavailable
 
-[click] Second, the test environment itself becomes a primary source of flakiness. This is why we so often hear, 'It works on my machine!' The paper classifies these as Environment-specific issues. A test might fail only on the Linux CI runner, or in a specific browser version, or at a different screen resolution.
+- On the other hand, you have
+- internal async operations 
+- This is the single biggest cause of flaky tests, a category the paper calls Async Wait 
+- it happens when
+  - executing faster than the browser can finish rendering DOM elements
+  - loading data, or 
+  - playing an animation
+- a fundamental mismatch in timing between our test and the application.
+- I'll talk more about this later and show a demo
 
-This problem is massively amplified by the nature of CI environments. They are often slower and more resource-constrained than our local development machines. This slowness isn't just an inconvenience; it's a catalyst. It takes those timing-related race conditions we just discussed and makes them far more likely to surface as real, intermittent failures. The slow, inconsistent nature of the CI environment is what makes these flakes so difficult to reproduce and debug.
+[click] 
+
+- the environment itself is also a primary source of flakiness
+- The paper classifies these as Environment issues. 
+- A test might fail
+  -  only on the Linux CI runner
+  -  in a specific browser version
+  -  a different screen resolution
+- snapshot/screenshot mismatches are a common result of this
+- show example
+
+- massively amplified by the nature of CI environments
+- slower and more resource-constrained than local
+- timing-related race conditions, more likely to surface as real, intermittent failures
+- inconsistent nature of the CI environment makes difficult to reproduce and debug
 -->
 
 ---
@@ -75,29 +102,41 @@ This problem is massively amplified by the nature of CI environments. They are o
 
 <!--
 
-Async Wait is the number one problem, making up nearly half of all E2E flakes. Let's break down what that actually means. At its core, it's a simple race condition: our test script is giving the browser commands faster than the browser can keep up.
+- Async Wait is the number one problem
+- making up nearly half of all E2E Flakes
+- break down:
+- it's a simple race condition
+- test script is giving the browser commands faster than the browser can keep up.
 
 This single category can be broken down into three more specific types of race conditions.
 
 [click] [click] [click]
 
-First, we have Network Resource Loading Imagine your test clicks a button that triggers a `fetch` request to an API to load a list of items. Your test script, running at full speed, immediately moves to the next line and asserts that the list contains ten items.
-
-But of course, the network request is still pending. It hasn't even hit the server yet, let alone returned a response. The assertion fails because it's checking for a state that is dependent on a slow, external operation. This is a race between your test script and the network.
-
-[click]
-
-Second, we have Resource Rendering. This one is more subtle. In this case, the data might have already returned from the network and be present in the browser's memory, but it's not yet visible or interactable on the screen.
-
-Think about a modal dialog that fades in with a CSS transition. The DOM element for the modal might exist the instant you click the button, but it's not yet visible or stable. If your test immediately tries to click a button *inside* that modal, it will fail with an 'element not interactable' error. This is a race between your test script and the browser's rendering engine."
+- Network Resource Loading
+- Imagine your test clicks a button that triggers a `fetch` request to an API to load a list of items. 
+- Your test script, immediately moves to the next line and asserts that the list contains ten items.
+- the network request is still pending, It hasn't even hit the server yet, let alone returned a response
+- The assertion fails because it's checking for a state that is dependent on a slow, external operation. This is a race between your test script and the network.
 
 [click]
 
-Finally, a particularly tricky subset of rendering issues is Animation Timing. This happens when an element is technically visible but is still moving. A classic example is a notification toast that slides in from the side of the screen.
+- Resource Rendering
+- In this case, the data might have already returned from the network and be present in the browser's memory
+- but it's not yet visible or interactable on the screen.
 
-Your test might correctly wait for it to be visible, but then immediately try to click its 'close' button. If the animation is still in progress, the click might miss or hit the wrong coordinates. This problem is even worse in CI environments, where headless browsers often throttle or change how they handle animations, making the timing completely different from what you see on your local machine.
+- a test script may attempts to click on a button and wait for the button to be displayed instead of the button being clickable.
+- Normally, these descriptions refer to the same event
+- but the modal overlay shown in the UI can block the target button from being clickable. 
+- The test can fail intermittently if another element is still above the button
+- such as an element acting as a background shade in a confirmation modal.
 
-So, as you can see, this one 'Async Wait' category covers a whole range of timing problems—racing the network, racing the renderer, and racing animations. Now, let's look at what this looks like in a real piece of code and, more importantly, how we fix it.
+[click]
+
+- is Animation Timing. 
+- This happens when an element is technically visible but is still moving
+- if you make assertions about a element's position, size, or appearance while it's mid-animation
+- the test may fail intermittently depending on how fast the animation runs in the current environment.
+- or if you wait for a fixed duration that is sometimes too short for the animation to complete. 
 
 -->
 
