@@ -13,24 +13,30 @@ Jeff Zou
 <PoweredBySlidev />
 
 ---
+class: flex flex-col
+---
 
 # What Makes E2E Tests Different?
 
 <v-clicks depth="2" class="text-xl" every="2">
 
 - **Highly asynchronous in nature**
-  - Tests race against both external network requests (**`Network`** flakiness) and internal UI updates like rendering and animations (**`Async Wait`** flakiness), the #1 root cause (Romano et al., 2021).
+  - Tests race against both external network requests (**`Network`** flakiness) and internal UI updates like rendering and animations (**`Async Wait`** flakiness), the #1 root cause [^1].
 
 - **Harder to detect and reproduce**
-  - Failures often only appear in the slow, resource-constrained CI pipeline. These **`Environment`**-specific flakes are hard to reproduce locally because of differences in OS, browser version, or screen resolution (Romano et al., 2021).
+  - Failures often only appear in the slow, resource-constrained CI pipeline. These **`Environment`**-specific flakes are hard to reproduce locally because of differences in OS, browser version, or screen resolution [^1].
 
 </v-clicks>
+
+<div class="flex-1" />
 
 <style>
 li p {
   margin: 0 auto;
 }
 </style>
+
+[^1]:(Romano et al., 2021) https://doi.org/10.1109/ICSE43902.2021.00141
 
 <!--
 We've mostly talked about flaky tests in the unit test world so far in this class, but E2E tests are a fundamentally different. I want to break down the four key characteristics that make them prone to flakiness
@@ -73,7 +79,7 @@ Async Wait is the number one problem, making up nearly half of all E2E flakes. L
 
 This single category can be broken down into three more specific types of race conditions.
 
-[click]
+[click] [click] [click]
 
 First, we have Network Resource Loading Imagine your test clicks a button that triggers a `fetch` request to an API to load a list of items. Your test script, running at full speed, immediately moves to the next line and asserts that the list contains ten items.
 
@@ -180,7 +186,7 @@ The `beforeEach` function registers a callback to be called before each of the t
 </v-switch>
 
 ```ts {all|3,10,22|11-14,16-19,23-27,29-32|6-8}{lines:true, maxHeight:'75%', at:1}
-import { describe, it, expect, test } from 'vitest'
+import { describe, it, expect, test, beforeEach } from 'vitest'
 
 describe('Array operations', () => {
   let arr: number[]
@@ -343,6 +349,8 @@ describe('spam', () => {
 </v-switch>
 
 ---
+layout: cover
+---
 
 # DEMO
 
@@ -372,6 +380,7 @@ class: p-4 leading-[0.5rem]
 | slidevjs/slidev                          | 0             | 0                  | 5                |
 | sxzz/unplugin-utils                      | 0             | 0                  | 2                |
 | tinylibs/tinyspy                         | 0             | 0                  | 3                |
+
 ---
 
 # Causes of OD Flaky Tests
@@ -382,14 +391,17 @@ class: p-4 leading-[0.5rem]
 
 ---
 
-# Discussion
+# Discussion [^1]
 
 -  Low prevalence of order-dependent tests in JavaScript compared to other languages like Python and Java.
 -  Attributed to:
    1. JavaScript developers' test organization practices (grouping related tests together).
    2. Testing frameworks (Vitest, Jest) running tests files in parallel by default and run test cases in the order they appear within files.
    3. Different programming practices (e.g., functional programming style) reducing shared mutable state.
+   4. Closure and module scoping limiting unintended interactions between tests.
 -  No major language-specific factors causing test order dependency in JavaScript.
+
+[^1]:(Hashemi et al., 2025) https://arxiv.org/abs/2501.12680
 
 ---
 
@@ -401,11 +413,6 @@ class: p-4 leading-[0.5rem]
 - Publish as NPM package
 - OR PR to Vitest repo
 
----
-layout: cover
----
-
-# Thank You!
 
 ---
 

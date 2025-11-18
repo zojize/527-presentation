@@ -53,7 +53,7 @@ function partitionSuiteChildren(suite: Suite): Array<Array<Task>> {
 }
 
 // https://github.com/vitest-dev/vitest/blob/main/packages/utils/src/random.ts
-let seed = Date.now()
+let seed = +Math.random().toString().slice(2)
 
 function random() {
   const x = Math.sin(seed++) * 10000
@@ -157,28 +157,11 @@ function generateCode(suite: Suite, indent = 0): string {
   return result
 }
 
-const isFirstTick = ref(true)
-
-let cancelTick: () => void = () => { }
+const seedRenderKey = ref(0)
 const refresh = () => {
-  cancelTick()
-  let isCanceled = false
-  cancelTick = () => {
-    isCanceled = true
-  }
-  nextTick(async () => {
-    if (isCanceled) {
-      return
-    }
-    seed = Date.now()
-    shuffleSuite(suiteA.value, order)
-    if (isFirstTick.value) {
-      nextTick(() => {
-        isFirstTick.value = false
-      })
-    }
-    await new Promise((resolve) => setTimeout(resolve, 0))
-  })
+  seed = +Math.random().toString().slice(2)
+  shuffleSuite(suiteA.value, order)
+  seedRenderKey.value++
 }
 </script>
 
@@ -192,7 +175,7 @@ const refresh = () => {
       :code
       :options="{ 
         containerStyle: false,
-        duration: isFirstTick ? 0 : 500,
+        duration: 500,
         stagger: 1,
         delayEnter: 0,
         delayMove: 0,
@@ -206,7 +189,7 @@ const refresh = () => {
       >
         <ph-arrow-clockwise class="p-2 w-8 h-8" />
       </button>
-      <code>seed: {{ seed }}</code>
+      <code :key="seedRenderKey">seed: {{ seed }}</code>
     </template>
   </div>
 </template>
