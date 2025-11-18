@@ -95,12 +95,31 @@ So, as you can see, this one 'Async Wait' category covers a whole range of timin
 
 -->
 
+---
+
+# Fixing Async Flakes
+
+<v-clicks depth="2" every="2" class="text-2xl">
+
+- **1. Add/Modify Wait/Sleep (Most Common)**
+  - The most frequent fix was to introduce or change a waiting mechanism. However, *how* you wait is critical.
+
+- **2. Modify Test Logic**
+  - Instead of just waiting, developers would change the test's flow to better synchronize with the application's state.
+
+- **3. Modify Assertion**
+  - Changing the assertion to wait for an observable outcome rather than checking a state immediately.
+
+</v-clicks>
+
 
 ---
 layout: cover
 ---
 
 # DEMO
+
+<!-- Cypress todolist mvp demo -->
 
 
 ---
