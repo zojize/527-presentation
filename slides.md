@@ -21,7 +21,7 @@ class: flex flex-col
 <v-clicks depth="2" class="text-xl" every="2">
 
 - **Highly asynchronous in nature**
-  - Tests race against both external network requests (**`Network`** flakiness) and internal UI updates like rendering and animations (**`Async Wait`** flakiness), the #1 root cause [^1].
+  - Tests race against both external network requests and internal UI updates like rendering and animations (**`Async Wait`** flakiness), the #1 root cause [^1].
 
 - **Harder to detect and reproduce**
   - Failures often only appear in the slow, resource-constrained CI pipeline. These **`Environment`**-specific flakes are hard to reproduce locally because of differences in OS, browser version, or screen resolution [^1].
@@ -63,7 +63,7 @@ li p {
 [click] 
 
 - the environment itself is also a primary source of flakiness
-- The paper classifies these as Environment issues. 
+- The paper classifies these as Environment issues.
 - A test might fail
   -  only on the Linux CI runner
   -  in a specific browser version
@@ -75,6 +75,7 @@ li p {
 - slower and more resource-constrained than local
 - timing-related race conditions, more likely to surface as real, intermittent failures
 - inconsistent nature of the CI environment makes difficult to reproduce and debug
+- also runtime is important, E2E test often run in terms of seconds or minutes, making it difficult to just run a test for thousands of times to catch flakes
 -->
 
 ---
@@ -157,6 +158,11 @@ This single category can be broken down into three more specific types of race c
 
 </v-clicks>
 
+<!--
+- increase timeout
+- reorder button clicks
+- disable animations
+-->
 
 ---
 layout: cover
@@ -460,5 +466,3 @@ class: p-4 leading-[0.5rem]
 - A. Romano, Z. Song, S. Grandhi, W. Yang and W. Wang, "An Empirical Analysis of UI-Based Flaky Tests," 2021 IEEE/ACM 43rd International Conference on Software Engineering (ICSE), Madrid, ES, 2021, pp. 1585-1597, doi: 10.1109/ICSE43902.2021.00141.
 - Liu, X., Song, Z., Fang, W., Yang, W., & Wang, W. (2024). WEFix: Intelligent Automatic Generation of Explicit Waits for Efficient Web End-to-End Flaky Tests. ArXiv. https://doi.org/10.1145/3589334.3645628
 - Hashemi, N., Tahir, A., Rasheed, S., Shi, A., & Blagojevic, R. (2025). Detecting and Evaluating Order-Dependent Flaky Tests in JavaScript. ArXiv. https://arxiv.org/abs/2501.12680
-
----
